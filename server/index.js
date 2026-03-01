@@ -36,6 +36,11 @@ app.use(compression());
 // Allows cross-origin requests from configured origins
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow all origins in production mode for flexibility
+    if (NODE_ENV === 'production') {
+      return callback(null, true);
+    }
+    
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
