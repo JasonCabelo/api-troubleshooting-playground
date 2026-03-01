@@ -28,7 +28,7 @@ export default defineConfig({
     // Generate source maps for production debugging
     sourcemap: false,
     // Minification options
-    minify: 'terser',
+    minify: 'esbuild',
     // Chunk size warning limit
     chunkSizeWarningLimit: 1000,
     // Rollup options for better bundling
