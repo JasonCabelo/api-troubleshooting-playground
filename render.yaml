@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: api-troubleshooting-playground
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    rootDir: server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false

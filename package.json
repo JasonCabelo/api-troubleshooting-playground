@@ -8,7 +8,10 @@
     "client": "vite",
     "server": "node server/index.js",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server/index.js",
+    "start:prod": "NODE_ENV=production node server/index.js",
+    "build:prod": "NODE_ENV=production vite build"
   },
   "dependencies": {
     "react": "^18.2.0",

@@ -1,6 +1,11 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
+// API base URL configuration - configurable via environment variable
+// In production, set VITE_API_BASE_URL to your production server URL
+// e.g., https://api.yourdomain.com
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 // Create the API Context - provides global state for API requests, logs, and metrics
 const ApiContext = createContext(null);
 
@@ -94,7 +99,7 @@ export function ApiProvider({ children }) {
       }
 
       // Make the API request through the proxy server
-      const res = await axios.post('http://localhost:3001/api/proxy', {
+      const res = await axios.post(`${API_BASE_URL}/api/proxy`, {
         url: request.url,
         method: request.method,
         headers: headersObj,
@@ -138,7 +143,7 @@ export function ApiProvider({ children }) {
    */
   const refreshLogs = async () => {
     try {
-      const res = await axios.get('http://localhost:3001/api/logs');
+      const res = await axios.get(`${API_BASE_URL}/api/logs`);
       setLogs(res.data);
     } catch (err) {
       console.error('Failed to refresh logs:', err);
@@ -153,7 +158,7 @@ export function ApiProvider({ children }) {
    */
   const refreshMetrics = async () => {
     try {
-      const res = await axios.get('http://localhost:3001/api/metrics');
+      const res = await axios.get(`${API_BASE_URL}/api/metrics`);
       setMetrics(res.data);
     } catch (err) {
       console.error('Failed to refresh metrics:', err);
@@ -170,7 +175,7 @@ export function ApiProvider({ children }) {
    */
   const analyzeError = async (statusCode) => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/analyze/${statusCode}`);
+      const res = await axios.get(`${API_BASE_URL}/api/analyze/${statusCode}`);
       setErrorAnalysis(res.data);
     } catch (err) {
       console.error('Failed to analyze error:', err);
@@ -185,7 +190,7 @@ export function ApiProvider({ children }) {
    */
   const clearLogs = async () => {
     try {
-      await axios.delete('http://localhost:3001/api/logs');
+      await axios.delete(`${API_BASE_URL}/api/logs`);
       setLogs([]);
       setMetrics({ endpoints: {}, summary: {} });
     } catch (err) {

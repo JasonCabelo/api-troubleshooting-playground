@@ -1,16 +1,70 @@
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
 
 // Initialize Express application
 const app = express();
-const PORT = 3001;
+
+// Environment configuration
+const PORT = process.env.DEV_PORT || process.env.PORT || 3001;
+const NODE_ENV = process.env.DEV_NODE_ENV || process.env.NODE_ENV || 'development';
+const ALLOWED_ORIGINS = (process.env.DEV_ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS)
+  ? (process.env.DEV_ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS).split(',') 
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+// Security middleware - Helmet
+// Sets various HTTP headers for security
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Compression middleware - compresses responses for better performance
+app.use(compression());
+
+// CORS configuration
+// Allows cross-origin requests from configured origins
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (ALLOWED_ORIGINS.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+// Request logging - Morgan
+// Logs HTTP requests in development or combined format for production
+if (NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
+}
 
 // Middleware configuration
-// CORS allows cross-origin requests from the frontend
 // JSON parsing enables reading request bodies
-app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Trust proxy for correct IP detection behind load balancers
+app.set('trust proxy', 1);
 
 /**
  * In-memory storage for API request logs
